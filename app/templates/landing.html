@@ -1,0 +1,610 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Live animated background — full viewport canvas behind everything -->
+<canvas id="live-bg"></canvas>
+
+<div class="landing-shell">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-headline">Play smart. Win big. Cash out via M-Pesa.</h1>
+        <p class="hero-subtext">Slots, dice, crash and more — deposit instantly with M-Pesa STK Push and withdraw your winnings straight to your phone.</p>
+        <div class="hero-cta">
+          <a href="{{ url_for('auth.register') }}" class="btn-gold btn-lg">Join now</a>
+          <a href="{{ url_for('auth.login') }}" class="btn-outline btn-lg">Sign in</a>
+        </div>
+        <div class="hero-badges">
+          <span class="badge-item">✓ Provably fair games</span>
+          <span class="badge-item">✓ Instant M-Pesa settlements</span>
+        </div>
+      </div>
+      <!-- Live multiplier ticker replacing static SVG -->
+      <div class="hero-visual">
+        <div class="hero-ticker-wrap">
+          <div class="ticker-label">LIVE MULTIPLIER</div>
+          <div class="ticker-value" id="hero-multiplier">1.00×</div>
+          <div class="ticker-bar-wrap"><div class="ticker-bar" id="hero-bar"></div></div>
+          <div class="ticker-sub">Crash · Aviator · JetX</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Balance</div>
+        <div class="stat-value">KES 0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Min Stake</div>
+        <div class="stat-value">KES 10</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Max Win</div>
+        <div class="stat-value">50x</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Payouts</div>
+        <div class="stat-value">Instant</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Games Section -->
+  <section class="games-showcase">
+    <h2>Casino Games</h2>
+    <p class="section-subtitle">8 games, infinite ways to win</p>
+    <div class="games-grid">
+      <a href="{{ url_for('casino.play', slug='aviatormzizi') }}" class="game-tile">
+        <div class="game-tile-icon">🚀</div>
+        <h3>Aviator</h3>
+        <p>Cash out before it flies away</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='jetx') }}" class="game-tile">
+        <div class="game-tile-icon">✈️</div>
+        <h3>JetX</h3>
+        <p>Ride the jet, bail in time</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='mzizicrash') }}" class="game-tile">
+        <div class="game-tile-icon">💥</div>
+        <h3>Crash</h3>
+        <p>Cash out before it busts</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='slots') }}" class="game-tile">
+        <div class="game-tile-icon">🎰</div>
+        <h3>Mzizi Slots</h3>
+        <p>Match 3 to win 50x</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='dice') }}" class="game-tile">
+        <div class="game-tile-icon">🎲</div>
+        <h3>Dice</h3>
+        <p>Roll over or under</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='hilocard') }}" class="game-tile">
+        <div class="game-tile-icon">🃏</div>
+        <h3>Higher or Lower</h3>
+        <p>Next card up or down?</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='european-roulette') }}" class="game-tile">
+        <div class="game-tile-icon">🎡</div>
+        <h3>Roulette</h3>
+        <p>Single zero — 36x on a number</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='plinkomzizi') }}" class="game-tile">
+        <div class="game-tile-icon">🎯</div>
+        <h3>Plinko</h3>
+        <p>Drop the ball, chase the multiplier</p>
+      </a>
+      <a href="{{ url_for('casino.play', slug='coin-flip') }}" class="game-tile">
+        <div class="game-tile-icon">🪙</div>
+        <h3>Coin Flip</h3>
+        <p>Heads or tails — 1.96x</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to play?</h2>
+      <p>Join thousands of players on Kenya's most trusted casino platform</p>
+      <a href="{{ url_for('auth.register') }}" class="btn-gold btn-lg">Join now</a>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Live canvas background ── */
+#live-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Everything above the canvas */
+.landing-shell,
+header.topbar {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero tweaks — transparent so canvas shows through */
+.hero {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── Live multiplier ticker ── */
+.hero-ticker-wrap {
+  background: rgba(23, 30, 25, 0.75);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 32px 40px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-width: 260px;
+}
+
+.ticker-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+}
+
+.ticker-value {
+  font-family: var(--font-mono);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1;
+  margin-bottom: 18px;
+  transition: color 0.2s ease;
+  text-shadow: 0 0 30px rgba(201,162,39,0.4);
+}
+
+.ticker-value.crashed { color: var(--brick); text-shadow: 0 0 30px rgba(179,58,58,0.4); }
+
+.ticker-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: var(--line);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.ticker-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--moss), var(--gold));
+  border-radius: 2px;
+  transition: width 0.1s linear, background 0.3s ease;
+}
+
+.ticker-bar.crashed { background: var(--brick); }
+
+.ticker-sub {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+/* Stats / games sections sit above canvas */
+.stats-section,
+.games-showcase,
+.cta-section {
+  position: relative;
+  z-index: 1;
+}
+
+/* Semi-transparent stat cards so canvas peeks through */
+.stat-card {
+  background: rgba(30, 39, 31, 0.80);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.stats-section {
+  background: rgba(23, 30, 25, 0.70);
+}
+
+/* Landing page specific styles */
+.landing-shell {
+  padding: 0;
+}
+
+/* Hero Section */
+.hero {
+  padding: 60px 28px;
+}
+
+.hero-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero-text { z-index: 2; }
+
+.hero-headline {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.hero-subtext {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  margin: 0 0 28px;
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+
+.hero-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.badge-item {
+  font-size: 0.92rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge-item::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: var(--gold);
+  border-radius: 50%;
+}
+
+.hero-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stats Section */
+.stats-section {
+  padding: 40px 28px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stats-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+/* Games Showcase */
+.games-showcase {
+  padding: 60px 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.games-showcase h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin: 0 0 32px;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+.game-tile {
+  background: rgba(23, 30, 25, 0.80);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.game-tile:hover {
+  background: rgba(30, 39, 31, 0.95);
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(201, 162, 39, 0.15);
+}
+
+.game-tile-icon { font-size: 2.5rem; margin-bottom: 12px; }
+
+.game-tile h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+
+.game-tile p {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* CTA Section */
+.cta-section {
+  background: linear-gradient(135deg, rgba(52, 85, 64, 0.85) 0%, rgba(30, 39, 31, 0.85) 100%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 60px 28px;
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.cta-content { max-width: 600px; margin: 0 auto; }
+
+.cta-section h2 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+
+.cta-section p {
+  font-size: 1.05rem;
+  color: var(--text-dim);
+  margin: 0 0 24px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero-content { grid-template-columns: 1fr; gap: 40px; }
+  .hero-headline { font-size: 2.2rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero { padding: 40px 28px; }
+  .games-showcase { padding: 40px 28px; }
+}
+
+@media (max-width: 600px) {
+  .hero { padding: 30px 16px; }
+  .hero-headline { font-size: 1.8rem; }
+  .hero-subtext { font-size: 0.95rem; }
+  .hero-cta { flex-direction: column; }
+  .btn-lg { width: 100%; text-align: center; }
+  .hero-visual { display: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat-card { padding: 16px; }
+  .stat-value { font-size: 1.3rem; }
+  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .game-tile { min-height: 140px; padding: 16px; }
+  .game-tile-icon { font-size: 2rem; }
+  .game-tile h3 { font-size: 0.95rem; }
+  .games-showcase h2 { font-size: 1.6rem; }
+  .cta-section h2 { font-size: 1.6rem; }
+  .cta-section { padding: 40px 16px; }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  /* ── Canvas live background ── */
+  const canvas = document.getElementById('live-bg');
+  const ctx    = canvas.getContext('2d');
+
+  const GOLD  = 'rgba(201,162,39,';
+  const MOSS  = 'rgba(74,124,89,';
+  const BRICK = 'rgba(179,58,58,';
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* Particles */
+  const PARTICLE_COUNT = 55;
+  const particles = Array.from({ length: PARTICLE_COUNT }, () => spawnParticle(true));
+
+  function spawnParticle(random) {
+    return {
+      x:     Math.random() * window.innerWidth,
+      y:     random ? Math.random() * window.innerHeight : window.innerHeight + 6,
+      r:     Math.random() * 2 + 0.6,
+      speed: Math.random() * 0.35 + 0.1,
+      drift: (Math.random() - 0.5) * 0.25,
+      alpha: Math.random() * 0.45 + 0.1,
+      color: Math.random() > 0.55 ? GOLD : MOSS,
+      pulse: Math.random() * Math.PI * 2,
+    };
+  }
+
+  /* Crash line */
+  let linePoints = [];
+  let lineX = 0;
+  let lineVal = 1.0;
+
+  function resetLine() {
+    linePoints = [{ x: 0, y: 0 }];
+    lineX  = 0;
+    lineVal = 1.0;
+  }
+  resetLine();
+
+  /* Ticker state */
+  const tickerEl  = document.getElementById('hero-multiplier');
+  const barEl     = document.getElementById('hero-bar');
+  let crashed     = false;
+  let crashTarget = 1.4 + Math.random() * 8;
+  let tickerVal   = 1.0;
+
+  function updateTicker() {
+    if (!tickerEl) return;
+    tickerEl.textContent = tickerVal.toFixed(2) + '×';
+    const pct = Math.min(((tickerVal - 1) / (crashTarget - 1)) * 100, 100);
+    barEl.style.width = pct + '%';
+  }
+
+  let last = 0;
+  function frame(ts) {
+    const dt = Math.min(ts - last, 50);
+    last = ts;
+
+    ctx.fillStyle = 'rgba(15,20,16,0.18)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    /* Particles */
+    particles.forEach((p, i) => {
+      p.pulse += 0.018;
+      p.y     -= p.speed;
+      p.x     += p.drift;
+      const a  = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color + a + ')';
+      ctx.fill();
+      if (p.y < -10) particles[i] = spawnParticle(false);
+    });
+
+    /* Crash curve */
+    const W = canvas.width;
+    const H = canvas.height;
+
+    if (!crashed) {
+      const growth = 0.0018 * dt;
+      tickerVal = Math.min(tickerVal + tickerVal * growth, crashTarget + 0.01);
+      lineX    += (W / 420) * (dt / 16);
+      const progress = (tickerVal - 1) / (crashTarget - 1);
+      const lineY    = H * 0.82 - progress * H * 0.62;
+      linePoints.push({ x: lineX, y: lineY });
+      while (linePoints.length > 1 && linePoints[0].x < lineX - W * 1.1) linePoints.shift();
+      updateTicker();
+
+      if (tickerVal >= crashTarget) {
+        crashed = true;
+        if (tickerEl) {
+          tickerEl.classList.add('crashed');
+          barEl.classList.add('crashed');
+          tickerEl.textContent = '💥 CRASHED';
+        }
+        setTimeout(() => {
+          crashed     = false;
+          crashTarget = 1.4 + Math.random() * 9;
+          tickerVal   = 1.0;
+          resetLine();
+          if (tickerEl) {
+            tickerEl.classList.remove('crashed');
+            barEl.classList.remove('crashed');
+          }
+          updateTicker();
+        }, 1800);
+      }
+    }
+
+    /* Draw line */
+    if (linePoints.length > 1) {
+      const offX = lineX - W * 0.88;
+      ctx.save();
+      ctx.translate(-offX, 0);
+      ctx.shadowColor = crashed ? '#B33A3A' : '#C9A227';
+      ctx.shadowBlur  = 12;
+      ctx.beginPath();
+      ctx.moveTo(linePoints[0].x, linePoints[0].y);
+      for (let i = 1; i < linePoints.length; i++) ctx.lineTo(linePoints[i].x, linePoints[i].y);
+      ctx.strokeStyle = crashed ? BRICK + '0.85)' : GOLD + '0.85)';
+      ctx.lineWidth   = 2.5;
+      ctx.lineJoin    = 'round';
+      ctx.lineCap     = 'round';
+      ctx.stroke();
+      ctx.lineTo(linePoints[linePoints.length - 1].x, H);
+      ctx.lineTo(linePoints[0].x, H);
+      ctx.closePath();
+      const grad = ctx.createLinearGradient(0, 0, 0, H);
+      grad.addColorStop(0, crashed ? BRICK + '0.18)' : GOLD + '0.12)');
+      grad.addColorStop(1, 'rgba(15,20,16,0)');
+      ctx.fillStyle  = grad;
+      ctx.shadowBlur = 0;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+{% endblock %}

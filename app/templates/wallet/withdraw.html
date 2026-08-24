@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Withdraw — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <h1>Withdraw to M-Pesa</h1>
+  {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <div class="field">
+      <label for="amount">Amount (KES)</label>
+      <input type="number" id="amount" name="amount" min="50" step="1" required>
+    </div>
+    <button type="submit" class="btn-gold auth-submit">Request withdrawal</button>
+  </form>
+  <p style="font-size:0.78rem;color:var(--text-faint);margin-top:14px;">
+    Funds are sent to {{ current_user.phone_number }} — the verified number on your account.
+    For your security, withdrawals can't be redirected to a different number here.
+  </p>
+</div>
+{% endblock %}

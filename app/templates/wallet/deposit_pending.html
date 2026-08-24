@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Deposit pending — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="auth-shell">
+  <h1>Check your phone</h1>
+  <p style="color:var(--text-dim);">
+    We've sent an M-Pesa request for <strong style="color:var(--gold-bright);">KES {{ '%.2f'|format(amount) }}</strong>.
+    Enter your M-Pesa PIN to complete the deposit — your balance updates automatically once it's confirmed.
+  </p>
+  <p id="deposit-status" style="font-size:0.8rem;color:var(--text-faint);"></p>
+  <a href="{{ url_for('wallet.overview') }}" class="btn-gold auth-submit" style="text-align:center;display:block;">Back to wallet</a>
+</div>
+
+{% if checkout_request_id %}
+<script>
+(function () {
+  var checkoutId = {{ checkout_request_id|tojson }};
+  var statusEl = document.getElementById("deposit-status");
+  var attempts = 0;
+
+  function poll() {
+    attempts += 1;
+    fetch("/wallet/deposit/status/" + encodeURIComponent(checkoutId))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data.status === "completed") {
+          statusEl.textContent = "Deposit confirmed! Redirecting to your wallet…";
+          setTimeout(function () { window.location = "{{ url_for('wallet.overview') }}"; }, 1200);
+          return;
+        }
+        if (data.status === "failed") {
+          statusEl.textContent = data.message || "Deposit was not completed. You can try again.";
+          return;
+        }
+        if (attempts < 40) {
+          statusEl.textContent = "Waiting for confirmation on your phone…";
+          setTimeout(poll, 3000);
+        } else {
+          statusEl.textContent = "Still waiting — check your wallet in a moment.";
+        }
+      })
+      .catch(function () {
+        if (attempts < 40) setTimeout(poll, 3000);
+      });
+  }
+
+  poll();
+})();
+</script>
+{% endif %}
+{% endblock %}

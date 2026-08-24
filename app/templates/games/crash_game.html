@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+
+{% block title %}Crash — Mzizibet{% endblock %}
+
+{% block content %}
+<div class="crash-shell">
+
+  <!-- Top bar -->
+  <div class="crash-topbar">
+    <a href="{{ url_for('index') }}" class="crash-back">← Back</a>
+    <h1 class="crash-title">💥 MziziCrash</h1>
+    <div class="crash-balance-wrap">
+      <span class="crash-balance-label">Balance</span>
+      <span class="crash-balance" id="balance">KES {{ "%.2f"|format(balance) }}</span>
+    </div>
+  </div>
+
+  <!-- History strip -->
+  <div class="crash-history" id="historyStrip">
+    <span class="history-label">Last rounds:</span>
+    <div class="history-pills" id="historyPills">—</div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="crash-layout">
+
+    <!-- Chart area -->
+    <div class="crash-chart-wrap">
+      <canvas id="crashCanvas"></canvas>
+
+      <!-- Multiplier overlay -->
+      <div class="crash-overlay-mult" id="multOverlay">
+        <div class="crash-mult" id="multDisplay">1.00×</div>
+        <div class="crash-phase" id="phaseLabel">Waiting for round…</div>
+      </div>
+
+      <!-- Countdown overlay (betting phase) -->
+      <div class="crash-overlay-bet" id="betOverlay" style="display:none">
+        <div class="bet-starts">Next round starts in</div>
+        <div class="bet-countdown" id="betCountdown">5</div>
+        <div class="bet-hint">Place your bet below</div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="crash-sidebar">
+
+      <!-- Bet panel -->
+      <div class="crash-panel">
+        <div class="crash-panel-title">Place Bet</div>
+
+        <label class="crash-label">Stake (KES)</label>
+        <div class="crash-input-row">
+          <input type="number" id="stakeInput" class="crash-input" value="50" min="10" step="10">
+          <button class="crash-half" onclick="halfStake()">½</button>
+          <button class="crash-dbl" onclick="doubleStake()">2×</button>
+        </div>
+
+        <div class="crash-presets">
+          <button onclick="setStake(10)">10</button>
+          <button onclick="setStake(50)">50</button>
+          <button onclick="setStake(100)">100</button>
+          <button onclick="setStake(500)">500</button>
+        </div>
+
+        <label class="crash-label" style="margin-top:14px">Auto Cash-Out at (×)</label>
+        <input type="number" id="autoCashoutInput" class="crash-input" placeholder="e.g. 2.00" min="1.01" step="0.01">
+
+        <button class="crash-btn-bet" id="betBtn" onclick="placeBet()">Place Bet</button>
+        <button class="crash-btn-cashout" id="cashoutBtn" onclick="cashOut()" style="display:none">
+          CASH OUT <span id="cashoutMult">1.00×</span>
+        </button>
+
+        <div class="crash-status" id="statusMsg"></div>
+      </div>
+
+      <!-- Live players -->
+      <div class="crash-panel">
+        <div class="crash-panel-title">Players This Round <span id="playerCount" class="crash-pill">0</span></div>
+        <div class="crash-players" id="playersList">
+          <span class="no-players">No bets yet</span>
+        </div>
+      </div>
+
+      <!-- Session stats -->
+      <div class="crash-panel crash-stats-panel">
+        <div class="crash-panel-title">My Stats</div>
+        <div class="crash-stat-row"><span>Wagered</span><span id="statWagered">0</span></div>
+        <div class="crash-stat-row"><span>Won</span><span id="statWon" class="green">0</span></div>
+        <div class="crash-stat-row"><span>Lost</span><span id="statLost" class="red">0</span></div>
+        <div class="crash-stat-row"><span>Best multi</span><span id="statBest" class="gold">—</span></div>
+        <div class="crash-stat-row"><span>Win rate</span><span id="statWinRate">—</span></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+/* ── Shell & layout ── */
+.crash-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 60px);
+  background: var(--bg);
+  padding: 0;
+}
+
+.crash-topbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.crash-back { color: var(--text-dim); font-size: 0.88rem; }
+.crash-back:hover { color: var(--gold); }
+.crash-title { font-family: var(--font-display); font-size: 1.3rem; color: var(--text); margin: 0; }
+.crash-balance-wrap { margin-left: auto; text-align: right; }
+.crash-balance-label { display: block; font-size: 0.7rem; color: var(--text-faint); text-transform: uppercase; }
+.crash-balance { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; color: var(--gold-bright); }
+
+/* ── History strip ── */
+.crash-history {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+.history-label { font-size: 0.75rem; color: var(--text-faint); white-space: nowrap; }
+.history-pills { display: flex; gap: 6px; flex-wrap: nowrap; }
+.h-pill {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.h-pill.low  { background: rgba(179,58,58,0.2); color: #E7B4B4; border: 1px solid var(--brick); }
+.h-pill.mid  { background: rgba(74,124,89,0.2); color: #B7D6BE; border: 1px solid var(--moss); }
+.h-pill.high { background: rgba(201,162,39,0.2); color: var(--gold-bright); border: 1px solid var(--gold); }
+
+/* ── Main layout ── */
+.crash-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 0;
+  flex: 1;
+}
+
+/* ── Chart ── */
+.crash-chart-wrap {
+  position: relative;
+  background: #0A0E0B;
+  border-right: 1px solid var(--line);
+  min-height: 420px;
+}
+#crashCanvas { width: 100%; height: 100%; display: block; }
+
+.crash-overlay-mult {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.crash-mult {
+  font-family: var(--font-mono);
+  font-size: 5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(201,162,39,0.5);
+  transition: color 0.2s;
+  line-height: 1;
+}
+.crash-mult.live  { color: var(--gold-bright); text-shadow: 0 0 40px rgba(201,162,39,0.6); }
+.crash-mult.crash { color: var(--brick); text-shadow: 0 0 40px rgba(179,58,58,0.8); }
+.crash-phase { font-size: 1rem; color: var(--text-dim); margin-top: 10px; font-weight: 500; }
+
+.crash-overlay-bet {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10,14,11,0.7);
+  backdrop-filter: blur(4px);
+}
+.bet-starts { font-size: 0.9rem; color: var(--text-dim); }
+.bet-countdown {
+  font-family: var(--font-mono);
+  font-size: 5rem;
+  font-weight: 700;
+  color: var(--gold-bright);
+  line-height: 1;
+  margin: 8px 0;
+}
+.bet-hint { font-size: 0.82rem; color: var(--text-faint); }
+
+/* ── Sidebar panels ── */
+.crash-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+.crash-panel {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.crash-panel-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.crash-pill {
+  background: var(--gold);
+  color: #171100;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.crash-label { font-size: 0.8rem; color: var(--text-dim); display: block; margin-bottom: 6px; }
+.crash-input-row { display: flex; gap: 6px; margin-bottom: 8px; }
+.crash-input {
+  flex: 1;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  padding: 9px 12px;
+  outline: none;
+}
+.crash-input:focus { border-color: var(--gold); }
+.crash-half, .crash-dbl {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 0 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.crash-half:hover, .crash-dbl:hover { border-color: var(--gold); color: var(--gold); }
+
+.crash-presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.crash-presets button {
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 6px 4px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+}
+.crash-presets button:hover { border-color: var(--gold); color: var(--gold); }
+
+.crash-btn-bet {
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--moss), var(--moss-dim));
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: var(--font-body);
+  box-shadow: 0 4px 20px rgba(74,124,89,0.3);
+  transition: filter 0.15s;
+}
+.crash-btn-bet:hover:not(:disabled) { filter: brightness(1.1); }
+.crash-btn-bet:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.crash-btn-cashout {
+  width: 100%;
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+  color: #171100;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-body);
+  box-shadow: 0 4px 24px rgba(201,162,39,0.4);
+  animation: cashout-pulse 0.8s infinite alternate;
+}
+@keyframes cashout-pulse {
+  from { box-shadow: 0 4px 24px rgba(201,162,39,0.4); }
+  to   { box-shadow: 0 4px 36px rgba(201,162,39,0.75); }
+}
+.crash-status {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  min-height: 20px;
+  text-align: center;
+}
+.crash-status.win  { color: #B7D6BE; }
+.crash-status.lose { color: #E7B4B4; }
+
+/* ── Players list ── */
+.crash-players { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+.no-players { font-size: 0.8rem; color: var(--text-faint); }
+.player-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+.player-name { color: var(--text-dim); }
+.player-bet  { font-family: var(--font-mono); color: var(--gold-bright); }
+.player-cash { font-family: var(--font-mono); color: var(--moss); }
+
+/* ── Stats ── */
+.crash-stats-panel { font-size: 0.84rem; }
+.crash-stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.crash-stat-row:last-child { border-bottom: none; }
+.crash-stat-row span:first-child { color: var(--text-faint); }
+.crash-stat-row .green { color: #B7D6BE; font-family: var(--font-mono); }
+.crash-stat-row .red   { color: #E7B4B4; font-family: var(--font-mono); }
+.crash-stat-row .gold  { color: var(--gold-bright); font-family: var(--font-mono); }
+
+/* Responsive */
+@media (max-width: 860px) {
+  .crash-layout { grid-template-columns: 1fr; }
+  .crash-chart-wrap { min-height: 280px; border-right: none; border-bottom: 1px solid var(--line); }
+  .crash-sidebar { max-height: none; }
+  .crash-mult { font-size: 3.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════
+   MziziCrash — full SocketIO client
+   Connects to /crash namespace, mirrors server state
+   ════════════════════════════════════════════════ */
+
+const socket = io('/crash', { transports: ['websocket', 'polling'] });
+
+/* ── DOM refs ── */
+const multDisplay   = document.getElementById('multDisplay');
+const phaseLabel    = document.getElementById('phaseLabel');
+const betOverlay    = document.getElementById('betOverlay');
+const betCountdown  = document.getElementById('betCountdown');
+const betBtn        = document.getElementById('betBtn');
+const cashoutBtn    = document.getElementById('cashoutBtn');
+const cashoutMult   = document.getElementById('cashoutMult');
+const statusMsg     = document.getElementById('statusMsg');
+const balanceEl     = document.getElementById('balance');
+const playerCount   = document.getElementById('playerCount');
+const playersList   = document.getElementById('playersList');
+const historyPills  = document.getElementById('historyPills');
+const stakeInput    = document.getElementById('stakeInput');
+const autoCashout   = document.getElementById('autoCashoutInput');
+const canvas        = document.getElementById('crashCanvas');
+const ctx           = canvas.getContext('2d');
+
+/* ── State ── */
+let phase        = 'waiting';   // waiting | betting | live | crashed
+let liveMulti    = 1.0;
+let hasBet       = false;
+let castedOut    = false;
+let betAmount    = 0;
+let autoCashoutX = null;
+let chartPoints  = [];
+let animFrame    = null;
+let roundStart   = null;
+
+/* Session stats */
+let sWagered = 0, sWon = 0, sLost = 0, sBest = 0, sWins = 0, sRounds = 0;
+
+/* ── Canvas resize ── */
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width;
+  canvas.height = rect.height;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+/* ── Draw chart ── */
+function drawChart() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  if (chartPoints.length < 2) return;
+
+  /* Grid */
+  ctx.strokeStyle = 'rgba(42,52,44,0.5)';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = H * (i / 4);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+  for (let i = 0; i <= 6; i++) {
+    const x = W * (i / 6);
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+
+  /* Curve */
+  const isCrashed = (phase === 'crashed');
+  const lineColor = isCrashed ? '#B33A3A' : '#C9A227';
+
+  /* Map points: x = time progress, y = multiplier height */
+  const maxX = chartPoints[chartPoints.length - 1].t;
+  const maxM = Math.max(liveMulti, 2);
+
+  const pts = chartPoints.map(p => ({
+    x: (p.t / Math.max(maxX, 1)) * W * 0.95 + W * 0.025,
+    y: H - ((Math.log(p.m) / Math.log(maxM)) * H * 0.88 + H * 0.06)
+  }));
+
+  /* Fill */
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, H);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length - 1].x, H);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, isCrashed ? 'rgba(179,58,58,0.25)' : 'rgba(201,162,39,0.18)');
+  grad.addColorStop(1, 'rgba(10,14,11,0)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  /* Line */
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.shadowColor = lineColor;
+  ctx.shadowBlur  = 10;
+  ctx.stroke();
+  ctx.shadowBlur  = 0;
+
+  /* Dot at tip */
+  const tip = pts[pts.length - 1];
+  ctx.beginPath();
+  ctx.arc(tip.x, tip.y, 5, 0, Math.PI * 2);
+  ctx.fillStyle = lineColor;
+  ctx.fill();
+
+  /* Y-axis labels */
+  ctx.fillStyle = 'rgba(155,166,156,0.7)';
+  ctx.font = '11px monospace';
+  ctx.textAlign = 'left';
+  for (let i = 1; i <= 4; i++) {
+    const m = Math.exp((i / 4) * Math.log(maxM));
+    const y = H - ((i / 4) * H * 0.88 + H * 0.06);
+    ctx.fillText(m.toFixed(2) + '×', 6, y - 3);
+  }
+}
+
+/* ── Socket events ── */
+socket.on('connect', () => {
+  socket.emit('join_game');
+  socket.emit('request_current_state');
+});
+
+socket.on('current_state', data => {
+  updateFromState(data);
+});
+
+socket.on('new_round', data => {
+  phase     = 'betting';
+  liveMulti = 1.0;
+  chartPoints = [];
+  hasBet    = false;
+  castedOut = false;
+  betAmount = 0;
+  roundStart = null;
+
+  setPhaseUI('betting');
+  updateHistory(data.game_history || []);
+  updatePlayers({});
+
+  /* Countdown */
+  let secs = data.betting_window || 5;
+  betCountdown.textContent = secs;
+  const tick = setInterval(() => {
+    secs -= 1;
+    betCountdown.textContent = Math.max(0, secs);
+    if (secs <= 0) clearInterval(tick);
+  }, 1000);
+});
+
+socket.on('game_start', data => {
+  phase     = 'live';
+  liveMulti = 1.0;
+  chartPoints = [{ t: 0, m: 1.0 }];
+  roundStart  = Date.now();
+  setPhaseUI('live');
+  playerCount.textContent = data.players || 0;
+
+  /* Start local animation (server sends updates but we animate smoothly) */
+  cancelAnimationFrame(animFrame);
+  animateLive();
+});
+
+socket.on('multiplier_update', data => {
+  liveMulti = data.multiplier;
+  const t   = data.elapsed || ((Date.now() - roundStart) / 1000);
+  chartPoints.push({ t, m: liveMulti });
+
+  multDisplay.textContent = liveMulti.toFixed(2) + '×';
+  cashoutMult.textContent = liveMulti.toFixed(2) + '×';
+
+  /* Auto cashout */
+  if (hasBet && !castedOut && autoCashoutX && liveMulti >= autoCashoutX) {
+    cashOut();
+  }
+
+  drawChart();
+});
+
+socket.on('game_crashed', data => {
+  phase = 'crashed';
+  liveMulti = data.crash_point;
+  chartPoints.push({ t: (Date.now() - (roundStart||Date.now())) / 1000, m: liveMulti });
+
+  multDisplay.textContent = liveMulti.toFixed(2) + '×';
+  multDisplay.className   = 'crash-mult crash';
+  phaseLabel.textContent  = '💥 CRASHED';
+
+  cancelAnimationFrame(animFrame);
+  drawChart();
+
+  if (hasBet && !castedOut) {
+    sLost   += betAmount;
+    sRounds += 1;
+    hasBet   = false;
+    setStatus(`Lost KES ${betAmount.toFixed(0)} — crashed @ ${liveMulti.toFixed(2)}×`, 'lose');
+    updateStats();
+    setBetBtnState('idle');
+    refreshBalance();
+  }
+
+  updateHistory(data.game_history || []);
+});
+
+socket.on('player_joined', data => {
+  playerCount.textContent = data.players || 0;
+});
+
+/* ── Animate live phase locally ── */
+function animateLive() {
+  drawChart();
+  if (phase === 'live') animFrame = requestAnimationFrame(animateLive);
+}
+
+/* ── Phase UI ── */
+function setPhaseUI(p) {
+  if (p === 'betting') {
+    betOverlay.style.display = 'flex';
+    multDisplay.textContent  = '—';
+    multDisplay.className    = 'crash-mult';
+    phaseLabel.textContent   = 'Betting window open';
+    if (!hasBet) {
+      setBetBtnState('idle');
+    } else {
+      setBetBtnState('placed');
+    }
+  } else if (p === 'live') {
+    betOverlay.style.display = 'none';
+    multDisplay.textContent  = '1.00×';
+    multDisplay.className    = 'crash-mult live';
+    phaseLabel.textContent   = 'Flying…';
+    if (hasBet && !castedOut) {
+      setBetBtnState('live');
+    } else {
+      setBetBtnState('watching');
+    }
+  } else if (p === 'crashed') {
+    betOverlay.style.display = 'none';
+    setBetBtnState('idle');
+  }
+}
+
+function setBetBtnState(s) {
+  betBtn.style.display     = 'block';
+  cashoutBtn.style.display = 'none';
+  betBtn.disabled          = false;
+  clearStatus();
+
+  if (s === 'placed') {
+    betBtn.textContent = 'Bet Placed ✓';
+    betBtn.disabled    = true;
+  } else if (s === 'live') {
+    betBtn.style.display     = 'none';
+    cashoutBtn.style.display = 'block';
+  } else if (s === 'watching') {
+    betBtn.textContent = 'Round In Progress';
+    betBtn.disabled    = true;
+  } else {
+    betBtn.textContent = 'Place Bet';
+  }
+}
+
+/* ── Place bet ── */
+async function placeBet() {
+  if (phase !== 'betting') {
+    setStatus('Wait for the betting window', '');
+    return;
+  }
+  if (hasBet) return;
+
+  const stake = parseFloat(stakeInput.value);
+  if (!stake || stake < 10) { setStatus('Min bet is KES 10', 'lose'); return; }
+
+  autoCashoutX = parseFloat(autoCashout.value) || null;
+  if (autoCashoutX && autoCashoutX < 1.01) autoCashoutX = null;
+
+  betBtn.disabled = true;
+  betBtn.textContent = 'Placing…';
+
+  const res  = await fetch('/crash/api/bet', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount: stake })
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    hasBet    = true;
+    betAmount = stake;
+    sWagered += stake;
+    setBetBtnState('placed');
+    setStatus(`Bet placed: KES ${stake.toFixed(0)}`, '');
+    updateBalance(data.balance);
+    updateStats();
+  } else {
+    setStatus(data.error || 'Bet failed', 'lose');
+    betBtn.disabled  = false;
+    betBtn.textContent = 'Place Bet';
+  }
+}
+
+/* ── Cash out ── */
+async function cashOut() {
+  if (!hasBet || castedOut || phase !== 'live') return;
+  castedOut = true;
+
+  const res  = await fetch('/crash/api/cashout', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+  const data = await res.json();
+
+  if (data.success) {
+    const profit = data.payout - betAmount;
+    sWon    += data.payout;
+    sWins   += 1;
+    sRounds += 1;
+    if (liveMulti > sBest) sBest = liveMulti;
+    hasBet   = false;
+    setBetBtnState('watching');
+    setStatus(`Cashed out @ ${liveMulti.toFixed(2)}× — Won KES ${data.payout.toFixed(0)} (+${profit.toFixed(0)})`, 'win');
+    updateBalance(data.balance);
+    updateStats();
+  } else {
+    castedOut = false;
+    setStatus(data.error || 'Cashout failed', 'lose');
+  }
+}
+
+/* ── Helpers ── */
+function updateFromState(data) {
+  if (data.status === 'live') {
+    phase     = 'live';
+    liveMulti = data.live_multiplier || 1.0;
+    if (!roundStart) roundStart = Date.now();
+    chartPoints = [{ t: 0, m: 1.0 }, { t: 1, m: liveMulti }];
+    multDisplay.textContent = liveMulti.toFixed(2) + '×';
+    multDisplay.className   = 'crash-mult live';
+    phaseLabel.textContent  = 'Flying…';
+    betOverlay.style.display = 'none';
+    animateLive();
+  } else if (data.status === 'pending' || data.is_betting) {
+    phase = 'betting';
+    betOverlay.style.display = 'flex';
+    betCountdown.textContent = '…';
+  }
+  updateHistory(data.game_history || []);
+  playerCount.textContent = data.players_count || 0;
+}
+
+function updateHistory(hist) {
+  if (!hist || !hist.length) return;
+  historyPills.innerHTML = hist.map(h => {
+    const m = parseFloat(h);
+    const cls = m < 2 ? 'low' : m < 5 ? 'mid' : 'high';
+    return `<span class="h-pill ${cls}">${h}</span>`;
+  }).join('');
+}
+
+function updatePlayers(players) {
+  playersList.innerHTML = '';
+  const entries = Object.entries(players || {});
+  if (!entries.length) {
+    playersList.innerHTML = '<span class="no-players">No bets yet</span>';
+    playerCount.textContent = 0;
+    return;
+  }
+  entries.forEach(([uid, p]) => {
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    const cashStr = p.cashout_at
+      ? `<span class="player-cash">${parseFloat(p.cashout_at).toFixed(2)}×</span>`
+      : '';
+    row.innerHTML = `<span class="player-name">${p.username || 'Player'}</span>
+      <span class="player-bet">KES ${p.bet_amount}</span>${cashStr}`;
+    playersList.appendChild(row);
+  });
+  playerCount.textContent = entries.length;
+}
+
+function updateBalance(b) {
+  balanceEl.textContent = 'KES ' + parseFloat(b).toFixed(2);
+}
+
+async function refreshBalance() {
+  try {
+    const r = await fetch('/crash/api/stats');
+    /* balance comes from wallet — re-fetch page data */
+    const rb = await fetch('/api/casino/get-balance');
+    const d  = await rb.json();
+    if (d.balance !== undefined) updateBalance(d.balance);
+  } catch(e) {}
+}
+
+function updateStats() {
+  document.getElementById('statWagered').textContent  = 'KES ' + sWagered.toFixed(0);
+  document.getElementById('statWon').textContent      = 'KES ' + sWon.toFixed(0);
+  document.getElementById('statLost').textContent     = 'KES ' + sLost.toFixed(0);
+  document.getElementById('statBest').textContent     = sBest > 0 ? sBest.toFixed(2) + '×' : '—';
+  const rate = sRounds > 0 ? ((sWins / sRounds) * 100).toFixed(0) + '%' : '—';
+  document.getElementById('statWinRate').textContent  = rate;
+}
+
+function setStatus(msg, cls) {
+  statusMsg.textContent  = msg;
+  statusMsg.className    = 'crash-status ' + (cls || '');
+}
+function clearStatus() {
+  statusMsg.textContent = '';
+  statusMsg.className   = 'crash-status';
+}
+
+/* ── Stake helpers ── */
+function setStake(v)    { stakeInput.value = v; }
+function halfStake()    { stakeInput.value = Math.max(10, Math.floor(parseFloat(stakeInput.value||0)/2)); }
+function doubleStake()  { stakeInput.value = Math.floor(parseFloat(stakeInput.value||0)*2); }
+</script>
+{% endblock %}
