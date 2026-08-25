@@ -1,11 +1,7 @@
 """
-FIXED: app/__init__.py with defensive imports and error handling
-
-Key improvements:
-1. Try-catch blocks around optional imports
-2. Better error messages if imports fail
-3. Graceful degradation if some features aren't available
-4. Clear logging of initialization steps
+app/__init__.py — Fixed initialization order:
+db.create_all() now runs BEFORE blueprints are registered so the
+game_loop background task never queries a table that doesn't exist yet.
 """
 
 import logging
@@ -14,14 +10,12 @@ from flask_login import current_user
 
 logger = logging.getLogger(__name__)
 
-# Import configuration
 try:
     from config import config
 except ImportError as e:
     logger.error(f"Failed to import config module: {e}")
     raise
 
-# Import extensions
 try:
     from app.extensions import db, login_manager, migrate, bcrypt, socketio
 except ImportError as e:
@@ -30,8 +24,6 @@ except ImportError as e:
 
 
 def _seed_catalog_if_empty():
-    """Populate game categories + catalog entries the first time the app
-    boots against an empty database."""
     try:
         import seed_fixed
         seed_fixed.run()
@@ -41,13 +33,10 @@ def _seed_catalog_if_empty():
 
 
 def _update_game_thumbnails():
-    """Update existing games with thumbnail URLs on startup.
-    NOTE: This is handled by seed_fixed.py's run() now."""
-    pass  # No longer needed - seed_fixed.py handles it
+    pass  # Handled by seed_fixed.py
 
 
 def _sync_sports_if_needed():
-    """Sync sports fixtures on startup if needed."""
     try:
         from sync_sports_fixed import sync_upcoming_fixtures
         sync_upcoming_fixtures()
@@ -61,21 +50,17 @@ def _sync_sports_if_needed():
 # =====================================================
 
 def init_scheduler(app):
-    """Initialize APScheduler for background sports syncing."""
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         from apscheduler.triggers.interval import IntervalTrigger
-        
-        scheduler = BackgroundScheduler()
 
-        # Configure scheduler
+        scheduler = BackgroundScheduler()
         scheduler.configure(
             jobstores={'default': {'type': 'memory'}},
             executors={'default': {'type': 'threadpool', 'max_workers': 2}},
             job_defaults={'coalesce': True, 'max_instances': 1}
         )
 
-        # Job 1: Sync live scores every 5 minutes
         scheduler.add_job(
             func=sync_live_scores_job,
             args=(app,),
@@ -85,7 +70,6 @@ def init_scheduler(app):
             replace_existing=True
         )
 
-        # Job 2: Sync upcoming fixtures every 6 hours
         scheduler.add_job(
             func=sync_upcoming_fixtures_job,
             args=(app,),
@@ -101,7 +85,7 @@ def init_scheduler(app):
         logger.info("  • Live scores: Every 5 minutes")
         logger.info("  • Upcoming fixtures: Every 6 hours")
         logger.info("=" * 50)
-        
+
         return scheduler
     except ImportError:
         logger.warning("⚠️  APScheduler not available, background jobs disabled")
@@ -112,7 +96,6 @@ def init_scheduler(app):
 
 
 def sync_live_scores_job(app):
-    """Background job: Sync live sports scores."""
     with app.app_context():
         try:
             from sync_sports_fixed import sync_live_scores
@@ -126,7 +109,6 @@ def sync_live_scores_job(app):
 
 
 def sync_upcoming_fixtures_job(app):
-    """Background job: Sync upcoming sports fixtures."""
     with app.app_context():
         try:
             from sync_sports_fixed import sync_upcoming_fixtures
@@ -144,10 +126,8 @@ def sync_upcoming_fixtures_job(app):
 # =====================================================
 
 def create_app(config_name="development"):
-    """Application factory with error handling"""
-    
     logger.info(f"Creating Flask app with config: {config_name}")
-    
+
     try:
         app = Flask(__name__)
         app.config.from_object(config[config_name])
@@ -170,7 +150,7 @@ def create_app(config_name="development"):
 
     login_manager.login_view = "auth.login"
 
-    # Import all model modules so SQLAlchemy knows about all tables
+    # Import all models so SQLAlchemy knows about all tables
     try:
         from app.models.user import User
         from app.models.wallet import Wallet, Transaction  # noqa: F401
@@ -185,8 +165,6 @@ def create_app(config_name="development"):
         )
         from app.routes.hilocard_blueprint import HiLoRound, HiloBet, HiLoStats  # noqa: F401
         from app.routes.plinkomzizi_blueprint import PlinkoRound, PlinkoBet, PlinkoStats  # noqa: F401
-        # NOTE: JetX model import removed — jetx blueprint replaced by rebrand Crash game.
-        # The jetx_* DB tables remain (no migration needed); the slug now redirects to /games/crash.
         logger.info("✓ All models imported successfully")
     except Exception as e:
         logger.error(f"❌ Failed to import models: {e}")
@@ -196,7 +174,27 @@ def create_app(config_name="development"):
     def load_user(user_id):
         return User.query.get(int(user_id))
 
-    # Register blueprints
+    # ─────────────────────────────────────────────────────────────
+    # FIX: Create DB tables BEFORE registering any blueprint.
+    # The game_loop background task starts inside get_mzizicrash_blueprint()
+    # and immediately queries CrashGame. If tables don't exist yet it
+    # crashes silently and the loop never runs — leaving the UI frozen
+    # on "Waiting for round…" forever.
+    # ─────────────────────────────────────────────────────────────
+    try:
+        with app.app_context():
+            logger.info("Creating database tables...")
+            db.create_all()
+            logger.info("✓ Database tables created")
+
+            _seed_catalog_if_empty()
+            _update_game_thumbnails()
+            _sync_sports_if_needed()
+    except Exception as e:
+        logger.error(f"❌ Error initializing database: {e}")
+        # Don't raise — app can still work even if seeding fails
+
+    # Register standard blueprints
     try:
         from app.routes.auth import auth_bp
         from app.routes.casino import casino_bp
@@ -204,23 +202,22 @@ def create_app(config_name="development"):
         from app.routes.sports import sports_bp
         from app.routes.wallet import wallet_bp
         from app.routes.admin import admin_bp
-        
+
         app.register_blueprint(auth_bp)
         app.register_blueprint(casino_bp)
         app.register_blueprint(casino_games_bp, url_prefix="/api/casino")
         app.register_blueprint(sports_bp)
         app.register_blueprint(wallet_bp, url_prefix="/wallet")
         app.register_blueprint(admin_bp, url_prefix="/admin")
-        
+
         logger.info("✓ All main blueprints registered")
     except Exception as e:
         logger.error(f"❌ Failed to register blueprints: {e}")
         raise
 
-    # Register Socket.IO game blueprints
+    # Register SocketIO game blueprints (tables already exist at this point)
     try:
         from app.routes.mzizicrash_blueprint import get_mzizicrash_blueprint
-
         mzizicrash_bp = get_mzizicrash_blueprint(socketio, app)
         if mzizicrash_bp:
             app.register_blueprint(mzizicrash_bp)
@@ -230,8 +227,6 @@ def create_app(config_name="development"):
     except Exception as e:
         logger.warning(f"⚠️  Error registering mzizicrash_blueprint: {e}")
 
-    # Aviator (Unity WebGL) — /aviator-mzizi/ only.
-    # JetX blueprint NOT registered — the jetx slug now redirects to /games/crash (rebrand React game).
     try:
         from app.routes.aviatorcrash_blueprint import get_aviatorcrash_blueprints
         aviator_bp, _jetx_unused, aviatorcrash_api_bp = get_aviatorcrash_blueprints(socketio, app)
@@ -239,15 +234,14 @@ def create_app(config_name="development"):
         app.register_blueprint(aviatorcrash_api_bp)
         logger.info("✓ aviatorcrash blueprints registered (serving /aviator-mzizi/ only)")
     except Exception as e:
-        logger.warning(f"\u26a0\ufe0f  Error registering aviatorcrash blueprints: {e}")
+        logger.warning(f"⚠️  Error registering aviatorcrash blueprints: {e}")
 
-    # Rebrand React games SPA — Crash, Plinko, Mines, Dino at /games/*
     try:
         from app.routes.games_static import games_static_bp
         app.register_blueprint(games_static_bp)
-        logger.info("\u2713 games_static blueprint registered (serving /games/*)")
+        logger.info("✓ games_static blueprint registered (serving /games/*)")
     except Exception as e:
-        logger.warning(f"\u26a0\ufe0f  Error registering games_static blueprint: {e}")
+        logger.warning(f"⚠️  Error registering games_static blueprint: {e}")
 
     try:
         from app.routes.hilocard_blueprint import get_hilocard_blueprint
@@ -271,20 +265,7 @@ def create_app(config_name="development"):
     except Exception as e:
         logger.warning(f"⚠️  Error registering plinkomzizi_blueprint: {e}")
 
-    # Create tables and seed data
-    try:
-        with app.app_context():
-            logger.info("Creating database tables...")
-            db.create_all()
-            logger.info("✓ Database tables created")
-            
-            _seed_catalog_if_empty()
-            _update_game_thumbnails()
-            _sync_sports_if_needed()
-    except Exception as e:
-        logger.error(f"❌ Error initializing database: {e}")
-        # Don't raise - app can still work even if seeding fails
-
+    # Root route
     @app.route("/")
     def index():
         return render_template("landing.html")
