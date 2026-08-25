@@ -46,14 +46,12 @@ game_state = GameState()
 class CrashEngine:
     """Provably-fair crash point generation with exponential distribution"""
     
-    # Game configuration
     MIN_MULTIPLIER = Decimal("2.00")
     MAX_MULTIPLIER = Decimal("500.00")
     HOUSE_EDGE = Decimal("0.02")  # 2% house edge
     
     @staticmethod
     def generate_server_seed():
-        """Generate random server seed"""
         return secrets.token_hex(32)
     
     @staticmethod
@@ -72,7 +70,6 @@ class CrashEngine:
         combined = f"{server_seed}{client_nonce}"
         hash_hex = hashlib.sha256(combined.encode()).hexdigest()
 
-        # Use first 52 bits for precision
         h = int(hash_hex[:13], 16)
         e = 2**52
 
@@ -80,9 +77,7 @@ class CrashEngine:
         if h % 33 == 0:
             return 1.00, client_nonce
 
-        # Inverse exponential CDF — gives realistic crash distribution
-        r = (h % e) / e          # uniform [0, 1)
-        # crash = 0.99 / (1 - r)  but capped
+        r = (h % e) / e
         crash = 0.99 / (1.0 - r)
         crash = max(1.01, min(float(CrashEngine.MAX_MULTIPLIER), round(crash, 2)))
 
@@ -90,7 +85,6 @@ class CrashEngine:
     
     @staticmethod
     def verify_crash_point(server_seed, client_nonce, claimed_multiplier):
-        """Verify a crash point was correctly generated"""
         generated, _ = CrashEngine.generate_crash_point(server_seed, client_nonce)
         return generated == claimed_multiplier
 
@@ -106,14 +100,7 @@ def _get_or_create_strategy_performance(user_id, strategy_name, game_type="crash
 
 
 def place_bet(user_id, amount, strategy_name=None):
-    """Place a bet on current round.
-
-    strategy_name is purely a record-keeping label: it tags this bet as
-    following a given staking plan so /api/strategies/performance can show
-    the player how that plan has done for them. It never changes the stake,
-    the game odds, or auto-places anything — the player enters the amount
-    and clicks bet/cashout themselves every round.
-    """
+    """Place a bet on current round."""
     try:
         amount = Decimal(str(amount))
         if strategy_name:
@@ -121,7 +108,6 @@ def place_bet(user_id, amount, strategy_name=None):
             if strategy_name not in valid_names:
                 strategy_name = None
         
-        # Validate bet amount
         if amount <= 0 or amount > Decimal("100000"):
             return {"success": False, "error": "Invalid bet amount (1-100000 KES)"}
 
@@ -140,10 +126,8 @@ def place_bet(user_id, amount, strategy_name=None):
         if user.wallet.balance < amount:
             return {"success": False, "error": "Insufficient balance"}
 
-        # Debit wallet
         user.wallet.balance -= amount
 
-        # Create bet record
         bet = CrashBet(
             user_id=user_id,
             game_id=game_state.current_round.id,
@@ -153,7 +137,6 @@ def place_bet(user_id, amount, strategy_name=None):
         db.session.add(bet)
         db.session.commit()
 
-        # Track active players
         game_state.players[user_id] = {
             "bet_id": bet.id,
             "bet_amount": float(amount),
@@ -196,20 +179,16 @@ def cashout_bet(user_id):
         if not bet or bet.status != "active":
             return {"success": False, "error": "Bet not found"}
 
-        # Calculate payout
         payout = bet.bet_amount * multiplier
 
-        # Update bet
         bet.status = "cashed_out"
         bet.cashout_at = multiplier
         bet.payout_amount = payout
         bet.cashed_out_at = datetime.utcnow()
 
-        # Credit wallet
         user = bet.user
         user.wallet.balance += payout
 
-        # Update stats
         if not user.crash_stats:
             user.crash_stats = CrashStats(user_id=user_id)
         
@@ -272,7 +251,6 @@ def resolve_round():
                 perf = _get_or_create_strategy_performance(bet.user_id, strategy_name)
                 perf.record_result(wagered=bet.bet_amount, won=False, payout=Decimal("0"))
 
-        # Add to history
         game_state.game_history.insert(0, f"{game_state.crash_point:.2f}x")
         if len(game_state.game_history) > 10:
             game_state.game_history.pop()
@@ -286,7 +264,6 @@ def resolve_round():
 
 
 def mask_username(user):
-    """Mask username for leaderboard display"""
     name = getattr(user, "username", None) or getattr(user, "phone", None) or f"user{user.id}"
     name = str(name)
     if len(name) <= 2:
@@ -300,7 +277,6 @@ def mask_username(user):
 
 @login_required
 def index():
-    """Load game page"""
     wallet = current_user.wallet if hasattr(current_user, 'wallet') else None
     balance = float(wallet.balance) if wallet else 0.0
     return render_template("games/crash_game.html", balance=balance)
@@ -308,7 +284,6 @@ def index():
 
 @login_required
 def api_status():
-    """Get current game status"""
     if not game_state.current_round:
         return jsonify({"status": "initializing"})
     
@@ -325,8 +300,6 @@ def api_status():
 
 @login_required
 def api_place_bet():
-    """Place a bet. Optional 'strategy_name' just tags the bet for the
-    player's own performance tracking — see /crash/api/strategies."""
     data = request.get_json()
     result = place_bet(current_user.id, data.get("amount"), data.get("strategy_name"))
     return jsonify(result)
@@ -334,7 +307,6 @@ def api_place_bet():
 
 @login_required
 def api_strategies():
-    """List available staking-plan strategies and their default config."""
     strategies = []
     for strat_type in StrategyFactory.list_strategies():
         strategies.append({
@@ -346,21 +318,18 @@ def api_strategies():
 
 @login_required
 def api_strategy_performance():
-    """This player's tracked results per strategy they've tried on this game."""
     rows = StrategyPerformance.query.filter_by(user_id=current_user.id, game_type="crash").all()
     return jsonify([r.to_dict() for r in rows])
 
 
 @login_required
 def api_cashout():
-    """Cash out current bet"""
     result = cashout_bet(current_user.id)
     return jsonify(result)
 
 
 @login_required
 def api_history():
-    """Get bet history"""
     limit = request.args.get("limit", 20, type=int)
     bets = CrashBet.query.filter_by(user_id=current_user.id)\
         .order_by(CrashBet.created_at.desc())\
@@ -379,7 +348,6 @@ def api_history():
 
 @login_required
 def api_stats():
-    """Get player statistics"""
     try:
         stats = getattr(current_user, 'crash_stats', None)
         if not stats:
@@ -399,21 +367,14 @@ def api_stats():
     except Exception as e:
         print(f"Stats error: {e}")
         return jsonify({
-            "total_wagered": 0,
-            "total_won": 0,
-            "total_lost": 0,
-            "win_count": 0,
-            "loss_count": 0,
-            "best_multiplier": 0,
-            "win_rate": 0
+            "total_wagered": 0, "total_won": 0, "total_lost": 0,
+            "win_count": 0, "loss_count": 0, "best_multiplier": 0, "win_rate": 0
         })
 
 
 @login_required
 def api_verify(round_id):
-    """Verify a round was fair (provably-fair proof)"""
     game = CrashGame.query.filter_by(round_number=round_id).first()
-    
     if not game:
         return jsonify({"error": "Round not found"}), 404
     
@@ -429,7 +390,6 @@ def api_verify(round_id):
 
 @login_required
 def api_leaderboard():
-    """Get top players by winnings"""
     top = db.session.query(CrashStats, CrashBet.user_id).join(
         CrashBet, CrashStats.user_id == CrashBet.user_id
     ).filter(CrashStats.total_winnings > 0).order_by(
@@ -463,10 +423,11 @@ def init_socketio(sio, app=None):
     @sio.on("connect", namespace="/crash")
     def on_connect():
         game_state.connected_players.add(request.sid)
+        # Send connection ack only to the connecting client
         socketio.emit("connection_response", {
             "data": "Connected to crash game",
             "players_online": len(game_state.connected_players)
-        }, namespace="/crash")
+        }, namespace="/crash", to=request.sid)
 
     @sio.on("disconnect", namespace="/crash")
     def on_disconnect():
@@ -474,6 +435,7 @@ def init_socketio(sio, app=None):
 
     @sio.on("join_game", namespace="/crash")
     def on_join():
+        # Notify OTHER players that someone joined (skip_sid is correct here)
         socketio.emit("player_joined", {
             "players": len(game_state.players),
             "connected": len(game_state.connected_players)
@@ -481,14 +443,18 @@ def init_socketio(sio, app=None):
 
     @sio.on("request_current_state", namespace="/crash")
     def on_request_state():
+        # FIX: must use to=request.sid so the state goes back to the
+        # requesting client only — without this the client that just
+        # connected never gets a phase sync and stays frozen on "waiting".
+        status = game_state.current_round.status if game_state.current_round else None
         socketio.emit("current_state", {
-            "round_number": game_state.round_number,
-            "status": game_state.current_round.status if game_state.current_round else None,
-            "is_betting": game_state.is_betting,
+            "round_number":    game_state.round_number,
+            "status":          status,
+            "is_betting":      game_state.is_betting,
             "live_multiplier": round(game_state.live_multiplier, 2),
-            "players_count": len(game_state.players),
-            "game_history": game_state.game_history
-        }, namespace="/crash")
+            "players_count":   len(game_state.players),
+            "game_history":    game_state.game_history
+        }, namespace="/crash", to=request.sid)
 
     if not _loop_started:
         if app:
@@ -500,7 +466,6 @@ def game_loop(app):
     """Main game loop with betting window and crash resolution"""
     print("✅ Crash game loop started")
 
-    # Resume from last round number in DB
     with app.app_context():
         try:
             last_game = CrashGame.query.order_by(CrashGame.round_number.desc()).first()
@@ -516,12 +481,12 @@ def game_loop(app):
                 # ============================================
                 # BETTING WINDOW (5 seconds)
                 # ============================================
-                
+
                 game_state.round_number += 1
-                
+
                 server_seed = CrashEngine.generate_server_seed()
                 crash_point, client_nonce = CrashEngine.generate_crash_point(server_seed)
-                
+
                 new_game = CrashGame(
                     round_number=game_state.round_number,
                     crash_point=crash_point,
@@ -539,15 +504,15 @@ def game_loop(app):
                 game_state.betting_start_time = time.time()
 
                 socketio.emit("new_round", {
-                    "round_number": game_state.round_number,
+                    "round_number":  game_state.round_number,
                     "betting_window": 5,
-                    "game_history": game_state.game_history
+                    "game_history":  game_state.game_history
                 }, namespace="/crash")
 
                 socketio.sleep(5)
 
                 # ============================================
-                # GAME LIVE (45 seconds)
+                # GAME LIVE
                 # ============================================
 
                 game_state.is_betting = False
@@ -556,20 +521,20 @@ def game_loop(app):
                 game_state.start_time = time.time()
                 db.session.commit()
 
+                # FIX: do NOT send crash_point to the client — that would
+                # let a cheating client know exactly when to cash out.
                 socketio.emit("game_start", {
-                    "crash_point": game_state.crash_point,
                     "players": len(game_state.players)
                 }, namespace="/crash")
 
-                # Exponential growth: multiplier = e^(k*t)
-                # Solve for k: crash_point = e^(k * duration) → k = ln(crash_point) / duration
-                # We target ~1s per 1x of crash point, capped between 5s and 60s
                 cp = game_state.crash_point
+
                 if cp <= 1.01:
-                    # Instant bust
+                    # Instant bust — emit one update then fall through to crash
                     game_state.live_multiplier = cp
                     socketio.emit("multiplier_update", {
-                        "multiplier": round(cp, 2), "elapsed": 0.0
+                        "multiplier": round(cp, 2),
+                        "elapsed":    0.0
                     }, namespace="/crash")
                 else:
                     game_duration   = max(5.0, min(60.0, cp * 1.2))
@@ -587,7 +552,6 @@ def game_loop(app):
 
                         game_state.live_multiplier = multiplier
 
-                        # Build players snapshot for UI
                         players_snap = {
                             str(uid): {
                                 "username":   p["username"],
@@ -613,9 +577,8 @@ def game_loop(app):
                 game_state.live_multiplier = game_state.crash_point
                 resolve_round()
 
-                # Broadcast final state
                 socketio.emit("game_crashed", {
-                    "crash_point": game_state.crash_point,
+                    "crash_point":  game_state.crash_point,
                     "round_number": game_state.round_number,
                     "game_history": game_state.game_history
                 }, namespace="/crash")
@@ -631,7 +594,7 @@ def game_loop(app):
 def get_mzizicrash_blueprint(sio, app):
     """Factory function to create blueprint and start game loop"""
     crash_bp = Blueprint("crash", __name__, url_prefix="/crash", template_folder="templates")
-    
+
     crash_bp.route("/")(index)
     crash_bp.route("/api/status")(api_status)
     crash_bp.route("/api/bet", methods=["POST"])(api_place_bet)
@@ -642,7 +605,7 @@ def get_mzizicrash_blueprint(sio, app):
     crash_bp.route("/api/leaderboard")(api_leaderboard)
     crash_bp.route("/api/strategies")(api_strategies)
     crash_bp.route("/api/strategies/performance")(api_strategy_performance)
-    
+
     init_socketio(sio, app)
-    
+
     return crash_bp
