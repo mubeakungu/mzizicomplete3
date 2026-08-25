@@ -1,12 +1,9 @@
 # ============================================================
-# CRITICAL: eventlet monkey_patch MUST be the very first thing
+# CRITICAL: gevent monkey_patch MUST be the very first thing
 # before ANY other import — including Flask, logging, os, etc.
-# Moving it even one import later breaks socket patching and
-# causes socketio.sleep() to block the process, freezing the
-# game loop forever on "Waiting for round…"
 # ============================================================
-import eventlet
-eventlet.monkey_patch()
+from gevent import monkey
+monkey.patch_all()
 
 # ── Only now is it safe to import everything else ──
 import os
