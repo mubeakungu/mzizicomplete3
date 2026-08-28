@@ -163,7 +163,6 @@ def create_app(config_name="development"):
         from app.models.aviatorcrash_models import (  # noqa: F401
             AviatorCrashRound, AviatorCrashBet, AviatorCrashStats,
         )
-        from app.routes.hilocard_blueprint import HiLoRound, HiloBet, HiLoStats  # noqa: F401
         from app.routes.plinkomzizi_blueprint import PlinkoRound, PlinkoBet, PlinkoStats  # noqa: F401
         logger.info("✓ All models imported successfully")
     except Exception as e:
@@ -215,13 +214,17 @@ def create_app(config_name="development"):
         logger.error(f"❌ Failed to register blueprints: {e}")
         raise
 
-    # Register SocketIO game blueprints (tables already exist at this point)
+    # ╔════════════════════════════════════════════════════════════════════╗
+    # ║  MZIZICRASH — Registered at /casino/play/mzizicrash                ║
+    # ║  The blueprint itself does NOT specify a url_prefix; it's passed   ║
+    # ║  here during registration, making it flexible for future changes.  ║
+    # ╚════════════════════════════════════════════════════════════════════╝
     try:
         from app.routes.mzizicrash_blueprint import get_mzizicrash_blueprint
         mzizicrash_bp = get_mzizicrash_blueprint(socketio, app)
         if mzizicrash_bp:
-            app.register_blueprint(mzizicrash_bp)
-            logger.info("✓ mzizicrash blueprint registered")
+            app.register_blueprint(mzizicrash_bp, url_prefix="/casino/play/mzizicrash")
+            logger.info("✓ mzizicrash blueprint registered at /casino/play/mzizicrash")
         else:
             logger.warning("⚠️  mzizicrash_blueprint returned None")
     except Exception as e:
@@ -242,17 +245,6 @@ def create_app(config_name="development"):
         logger.info("✓ games_static blueprint registered (serving /games/*)")
     except Exception as e:
         logger.warning(f"⚠️  Error registering games_static blueprint: {e}")
-
-    try:
-        from app.routes.hilocard_blueprint import get_hilocard_blueprint
-        hilo_bp = get_hilocard_blueprint(socketio, app)
-        if hilo_bp:
-            app.register_blueprint(hilo_bp)
-            logger.info("✓ hilocard blueprint registered")
-        else:
-            logger.warning("⚠️  hilocard_blueprint returned None")
-    except Exception as e:
-        logger.warning(f"⚠️  Error registering hilocard_blueprint: {e}")
 
     try:
         from app.routes.plinkomzizi_blueprint import get_plinkomzizi_blueprint
