@@ -49,14 +49,6 @@ GAME_IMAGE_QUERIES = {
     "plinkomzizi": "pachinko pinball lights neon",
     "dino": "dinosaur pixel game retro runner",
     "slots": "slot machine reels neon casino",
-    "football-manager": "soccer stadium manager tactics",
-    "pilotx": "fighter jet cockpit sky",
-    "jet-crash": "jet airplane takeoff multiplier",
-    "pool": "pool billiards table balls",
-    "camels-6": "camel racing desert",
-    "camels-8": "camel racing desert",
-    "horses-6": "horse racing track",
-    "horses-8": "horse racing track",
 }
 
 CATEGORIES = [
@@ -89,16 +81,6 @@ GAMES = [
 
     # --- Coming Soon ---
     ("Coin Flip", "coin-flip", "table", "SOON", None),
-
-    # --- Coming Soon (from jantabets catalog, no engine/template yet) ---
-    ("Football Manager", "football-manager", "crash", "SOON", None),
-    ("PilotX",           "pilotx",           "crash", "SOON", None),
-    ("Jet",              "jet-crash",        "crash", "SOON", None),
-    ("Pool",             "pool",             "table", "SOON", None),
-    ("Camels 6",         "camels-6",         "table", "SOON", None),
-    ("Camels 8",         "camels-8",         "table", "SOON", None),
-    ("Horses 6",         "horses-6",         "table", "SOON", None),
-    ("Horses 8",         "horses-8",         "table", "SOON", None),
 ]
 
 
