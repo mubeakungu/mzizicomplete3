@@ -1,0 +1,659 @@
+[
+  {
+    "id": "619f7b2f0e70964315094419",
+    "provider": "flg",
+    "gameId": "0",
+    "name": "Keno 1 min",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_1min_blue.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441a",
+    "provider": "flg",
+    "gameId": "1",
+    "name": "Keno 2 min",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_2min_red.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441b",
+    "provider": "flg",
+    "gameId": "2",
+    "name": "Keno 4 min",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_4min_green.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441c",
+    "provider": "flg",
+    "gameId": "3",
+    "name": "Keno Gold",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_gold.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441d",
+    "provider": "flg",
+    "gameId": "5",
+    "name": "Keno Classic 2 min",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_classic_2min_red.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441e",
+    "provider": "flg",
+    "gameId": "6",
+    "name": "Keno Classic 4 min",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_classic_4min_green.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e7096431509441f",
+    "provider": "flg",
+    "gameId": "8",
+    "name": "Bingo 37",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/bingo_37.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094421",
+    "provider": "flg",
+    "gameId": "13",
+    "name": "Poker",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/poker.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094422",
+    "provider": "hdraces",
+    "gameId": "jantabets_horses_6",
+    "name": "Horses 6",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/horse_6.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094423",
+    "provider": "hdraces",
+    "gameId": "jantabets_horses_8",
+    "name": "Horses 8",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/horse_8.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094424",
+    "provider": "hdraces",
+    "gameId": "jantabets_greyhounds_6",
+    "name": "Dogs 6",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/dog_6.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094425",
+    "provider": "hdraces",
+    "gameId": "jantabets_greyhounds_8",
+    "name": "Dogs 8",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/dog_8.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "619f7b2f0e70964315094426",
+    "provider": "bk",
+    "gameId": "bk",
+    "name": "Sport",
+    "thumbnailUrl": "",
+    "category": "sport",
+    "isEnabled": true
+  },
+  {
+    "id": "635bd5940ecc1813591549a2",
+    "provider": "hdraces",
+    "gameId": "jantabets_camels_6",
+    "name": "Camels 6",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/camel_6.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "635bd5b00ecc181359154f6a",
+    "provider": "hdraces",
+    "gameId": "jantabets_camels_8",
+    "name": "Camels 8",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/hdraces/camel_8.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff7586c",
+    "provider": "redpipe",
+    "gameId": "bingo37",
+    "name": "Bingo37",
+    "thumbnailUrl": "https://static.rpservers.com/assets/ib/bingo37/bingo37-thumb.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff7586f",
+    "provider": "redpipe",
+    "gameId": "keno-live",
+    "name": "Keno Live",
+    "thumbnailUrl": "https://static.rpservers.com/assets/ib/keno-live/keno-live-thumb.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75870",
+    "provider": "redpipe",
+    "gameId": "keno-neon",
+    "name": "Keno Neon",
+    "thumbnailUrl": "https://static.rpservers.com/assets/ib/keno-neon/keno-neon-thumb.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75871",
+    "provider": "redpipe",
+    "gameId": "keno-night",
+    "name": "Keno Night",
+    "thumbnailUrl": "https://static.rpservers.com/assets/ib/keno-night/keno-night-thumb.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75872",
+    "provider": "redpipe",
+    "gameId": "xkeno",
+    "name": "XKeno",
+    "thumbnailUrl": "https://static.rpservers.com/assets/ib/xkeno/xkeno-thumb.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75873",
+    "provider": "redpipe",
+    "gameId": "penalty",
+    "name": "Penalty",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/penalty.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75875",
+    "provider": "redpipe",
+    "gameId": "fu-fish",
+    "name": "Fu Fish",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/fu-fish.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75876",
+    "provider": "redpipe",
+    "gameId": "fu-fruits",
+    "name": "Fu Fruits",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/fu-fruits.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75879",
+    "provider": "redpipe",
+    "gameId": "ocean-ruler",
+    "name": "Ocean Ruler",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/ocean-ruler.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75887",
+    "provider": "redpipe",
+    "gameId": "penalty-shoot-out",
+    "name": "Penalty Shoot-Out",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/penalty-shoot-out.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75889",
+    "provider": "redpipe",
+    "gameId": "thimbles",
+    "name": "Thimbles",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/thimbles.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff7588a",
+    "provider": "redpipe",
+    "gameId": "heads-and-tails",
+    "name": "Heads \u0026 Tails",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/heads-and-tails.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff7588e",
+    "provider": "redpipe",
+    "gameId": "etraces",
+    "name": "E.T. Races",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/etraces.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff7588f",
+    "provider": "redpipe",
+    "gameId": "more-or-less",
+    "name": "More Or Less",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/more-or-less.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75890",
+    "provider": "redpipe",
+    "gameId": "rock-vs-paper-vikings-mode",
+    "name": "Rock vs Paper: Viking’s mode",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/rock-vs-paper-vikings-mode.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75894",
+    "provider": "redpipe",
+    "gameId": "christmas-party",
+    "name": "Christmas Party",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/christmas-party.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75896",
+    "provider": "redpipe",
+    "gameId": "lucky-crumbling",
+    "name": "Lucky Crumbling",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/lucky-crumbling.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "641ade2537fcd8982ff75898",
+    "provider": "redpipe",
+    "gameId": "football-manager",
+    "name": "Football Manager",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/football-manager.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228ba",
+    "provider": "flg",
+    "gameId": "18",
+    "name": "Roulette Lotto",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/roulette_lotto.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228bc",
+    "provider": "flg",
+    "gameId": "20",
+    "name": "Keno JX",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/keno_jx.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228bd",
+    "provider": "flg",
+    "gameId": "37",
+    "name": "Penalty 1 min",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/37.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228be",
+    "provider": "flg",
+    "gameId": "72",
+    "name": "Lotto 5/36",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/lotto_5_36.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228bf",
+    "provider": "flg",
+    "gameId": "73",
+    "name": "Lotto 6/42",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/lotto_6_42.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228c0",
+    "provider": "flg",
+    "gameId": "74",
+    "name": "Lotto 7/49",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/lotto_7_49.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228c1",
+    "provider": "flg",
+    "gameId": "416",
+    "name": "Dog6 1 min",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/416.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "641db9c1309df054906228c2",
+    "provider": "flg",
+    "gameId": "417",
+    "name": "Horse6 1 min",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/417.jpg",
+    "category": "races",
+    "isEnabled": true
+  },
+  {
+    "id": "6465f1cbc33c39810eca3cac",
+    "provider": "aviatrix",
+    "gameId": "aviatrix",
+    "name": "Aviatrix",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/aviatrix/aviatrix.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "64e6007dd142c696878cd8fe",
+    "provider": "flg",
+    "gameId": "248",
+    "name": "Spin To Win",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/flg/spin_to_win.jpg",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "652526841ccfcac4e3c3195d",
+    "provider": "flg",
+    "gameId": "40",
+    "name": "Football",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/40.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727a",
+    "provider": "galaxsys",
+    "gameId": "11289",
+    "name": "BlackJack",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/blackjack.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727b",
+    "provider": "galaxsys",
+    "gameId": "10512",
+    "name": "Keno Express",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/kenoexpress.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727c",
+    "provider": "galaxsys",
+    "gameId": "6492",
+    "name": "Penalty",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/penalty.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727d",
+    "provider": "galaxsys",
+    "gameId": "5935",
+    "name": "Rocketon",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/galaxsys/rocketon.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727e",
+    "provider": "galaxsys",
+    "gameId": "5339",
+    "name": "SicBo",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/sicbo.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f727f",
+    "provider": "galaxsys",
+    "gameId": "5236",
+    "name": "Hilo",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/hilo.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7280",
+    "provider": "galaxsys",
+    "gameId": "2014",
+    "name": "Crash",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/crash.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7281",
+    "provider": "galaxsys",
+    "gameId": "2010",
+    "name": "Keno 10 (1 Minute)",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/keno10_1min.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7282",
+    "provider": "galaxsys",
+    "gameId": "19",
+    "name": "Keno 8 (1 Minute)",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/keno8_1min.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7283",
+    "provider": "galaxsys",
+    "gameId": "15543",
+    "name": "Keno 10 (2 Minute)",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/keno10_2min.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7284",
+    "provider": "galaxsys",
+    "gameId": "15542",
+    "name": "Keno 8 (2 Minute)",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/keno8_2min.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7285",
+    "provider": "galaxsys",
+    "gameId": "20786",
+    "name": "Cash Show",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/cashshow.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7286",
+    "provider": "galaxsys",
+    "gameId": "32727",
+    "name": "F Mines",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/fmines.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7287",
+    "provider": "galaxsys",
+    "gameId": "32725",
+    "name": "Plinkoman",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/plinkoman.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7288",
+    "provider": "galaxsys",
+    "gameId": "32724",
+    "name": "Mr.Thimble",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/mrthimble.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f7289",
+    "provider": "galaxsys",
+    "gameId": "27201",
+    "name": "Golden Ra",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/goldenra.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f728a",
+    "provider": "galaxsys",
+    "gameId": "34139",
+    "name": "Crasher",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/crasher.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f728b",
+    "provider": "galaxsys",
+    "gameId": "34554",
+    "name": "Roulette X",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/roulettex.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f728c",
+    "provider": "galaxsys",
+    "gameId": "34829",
+    "name": "Jungle Wheel",
+    "thumbnailUrl": "https://jantabets.co.ke/static/pictures/galaxsys/junglewheel.png",
+    "category": "video-games",
+    "isEnabled": true
+  },
+  {
+    "id": "65252a4173e9fa41b93f728d",
+    "provider": "galaxsys",
+    "gameId": "34184",
+    "name": "Ninja Crash",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/galaxsys/ninjacrash.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "66278951d345443f713e7dec",
+    "provider": "redpipe",
+    "gameId": "aviator",
+    "name": "Aviator",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/aviator.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "683435371b2aad26d2f33af5",
+    "provider": "redpipe",
+    "gameId": "jet",
+    "name": "Jet",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/jet.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "683435371b2aad26d2f33af7",
+    "provider": "redpipe",
+    "gameId": "pilotx",
+    "name": "PilotX",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/redpipe/pilotx.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "6840552af628b66553fc796c",
+    "provider": "baas",
+    "gameId": "Chicken_5",
+    "name": "CrazyCock",
+    "thumbnailUrl": "https://dqfltanpad1wn.cloudfront.net/baas/crazy-cock.jpg",
+    "category": "crash",
+    "isEnabled": true
+  },
+  {
+    "id": "68bacde27702af418b3676d8",
+    "provider": "flg",
+    "gameId": "239",
+    "name": "Plinko",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/plinko.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "68bacde27702af418b3676d9",
+    "provider": "flg",
+    "gameId": "52",
+    "name": "Hi\u0026Lo",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/hilo.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "68bacde27702af418b3676da",
+    "provider": "flg",
+    "gameId": "240",
+    "name": "HeadsTails",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/head-tails.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "68bacde27702af418b3676db",
+    "provider": "flg",
+    "gameId": "238",
+    "name": "Minesweeper",
+    "thumbnailUrl": "https://bet-n-go.s3.eu-west-3.amazonaws.com/flg/minesweeper.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  },
+  {
+    "id": "68dd31eb49ba11345682cebc",
+    "provider": "baas",
+    "gameId": "Billiards_8",
+    "name": "Pool",
+    "thumbnailUrl": "https://dqfltanpad1wn.cloudfront.net/baas/pool.jpg",
+    "category": "virtuals",
+    "isEnabled": true
+  }
+]
